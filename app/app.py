@@ -45,25 +45,37 @@ if menu == "Show Books":
 if menu == "Add New Book":
     st.header("📘 Add a New Book to the Library")
 
-    if "reset_form" in st.session_state:
-        for key in ["book_title", "book_language", "book_author", "book_genre"]:
-            st.session_state.pop(key, None)
-        del st.session_state["reset_form"]
-        st.rerun()
+    # Initialisiere Reset-Flag beim ersten Start
+    if "reset_book_form" not in st.session_state:
+        st.session_state["reset_book_form"] = False
 
+    # Initialisiere alle Eingabefelder bei erstem Lauf
+    for key in ["book_title", "language", "author_name", "genre_name"]:
+        if key not in st.session_state:
+            st.session_state[key] = ""
+
+    # Felder leeren, wenn Reset durch vorheriges Hinzufügen ausgelöst wurde
+    if st.session_state["reset_book_form"]:
+        for key in ["book_title", "language", "author_name", "genre_name"]:
+            st.session_state[key] = ""
+        st.session_state["reset_book_form"] = False
+
+    # Eingabefelder mit Key-Bindung
     title = st.text_input("Book Title", key="book_title")
-    language = st.text_input("Language", key="book_language")
-    author_name = st.text_input("Author Full Name", key="book_author")
-    genre_name = st.text_input("Genre Name", key="book_genre")
+    language = st.text_input("Language", key="language")
+    author_name = st.text_input("Author Full Name", key="author_name")
+    genre_name = st.text_input("Genre Name", key="genre_name")
 
+    # Button zum Hinzufügen
     if st.button("Add Book"):
         result = call_add_new_book(title, author_name, genre_name, language)
         if result is True:
             st.success("Book added successfully!")
-            st.session_state["reset_form"] = True
-            st.rerun()
+            st.session_state["reset_book_form"] = True
+            st.rerun()  # Neustart der App nach Reset
         else:
             st.error(result)
+
 
 # Add new borrower
 if menu == "Add New Borrower":
