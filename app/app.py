@@ -43,16 +43,25 @@ if menu == "Show Books":
 
 # Add new book
 if menu == "Add New Book":
-    st.header("📘 Add New Book to Liana’s Library")
-    title = st.text_input("Book Title")
-    language = st.text_input("Language")
-    author_name = st.text_input("Author Full Name")
-    genre_name = st.text_input("Genre Name")
+    st.header("📘 Add a New Book to the Library")
+
+    if "reset_form" in st.session_state:
+        for key in ["book_title", "book_language", "book_author", "book_genre"]:
+            st.session_state.pop(key, None)
+        del st.session_state["reset_form"]
+        st.rerun()
+
+    title = st.text_input("Book Title", key="book_title")
+    language = st.text_input("Language", key="book_language")
+    author_name = st.text_input("Author Full Name", key="book_author")
+    genre_name = st.text_input("Genre Name", key="book_genre")
 
     if st.button("Add Book"):
         result = call_add_new_book(title, author_name, genre_name, language)
         if result is True:
             st.success("Book added successfully!")
+            st.session_state["reset_form"] = True
+            st.rerun()
         else:
             st.error(result)
 
