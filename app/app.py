@@ -20,63 +20,30 @@ menu = st.sidebar.selectbox("Navigate", [
 
 # Show books
 if menu == "Show Books":
-    st.header("📚 Overview of All Books in the Library")
-
+    st.header("Books Table")
     books_df = get_all_books_status()
 
     if books_df.empty:
         st.info("No books in the library yet.")
     else:
-        books_df.reset_index(drop=True, inplace=True)
-
-        def color_title_by_status(row):
-            if row["status"] == "Available":
-                return f'<span style="color:darkgreen;"><b>{row["title"]}</b></span>'
-            elif row["status"] == "Borrowed":
-                return f'<span style="color:darkred;"><b>{row["title"]}</b></span>'
-            return row["title"]
-
-        books_df["title"] = books_df.apply(color_title_by_status, axis=1)
-        books_df.drop(columns=["status"], inplace=True)
-
-        # index=False takes away column of index
-        st.write(books_df.to_html(index=False, escape=False), unsafe_allow_html=True)
+        styled_df = style_book_status(books_df)
+        st.write("Legend: 🟢 Available | 🔴 Borrowed")
+        st.write(styled_df.to_html(escape=False), unsafe_allow_html=True)
 
 # Add new book
 if menu == "Add New Book":
-    st.header("📘 Add a New Book to the Library")
+    st.header("📘 Add New Book to Liana’s Library")
+    title = st.text_input("Book Title")
+    language = st.text_input("Language")
+    author_name = st.text_input("Author Full Name")
+    genre_name = st.text_input("Genre Name")
 
-    # Initialisiere Reset-Flag beim ersten Start
-    if "reset_book_form" not in st.session_state:
-        st.session_state["reset_book_form"] = False
-
-    # Initialisiere alle Eingabefelder bei erstem Lauf
-    for key in ["book_title", "language", "author_name", "genre_name"]:
-        if key not in st.session_state:
-            st.session_state[key] = ""
-
-    # Felder leeren, wenn Reset durch vorheriges Hinzufügen ausgelöst wurde
-    if st.session_state["reset_book_form"]:
-        for key in ["book_title", "language", "author_name", "genre_name"]:
-            st.session_state[key] = ""
-        st.session_state["reset_book_form"] = False
-
-    # Eingabefelder mit Key-Bindung
-    title = st.text_input("Book Title", key="book_title")
-    language = st.text_input("Language", key="language")
-    author_name = st.text_input("Author Full Name", key="author_name")
-    genre_name = st.text_input("Genre Name", key="genre_name")
-
-    # Button zum Hinzufügen
     if st.button("Add Book"):
         result = call_add_new_book(title, author_name, genre_name, language)
         if result is True:
             st.success("Book added successfully!")
-            st.session_state["reset_book_form"] = True
-            st.rerun()  # Neustart der App nach Reset
         else:
             st.error(result)
-
 
 # Add new borrower
 if menu == "Add New Borrower":
