@@ -15,7 +15,7 @@ st.title("📚 Liana's Literary Lounge")
 
 # Sidebar navigation
 menu = st.sidebar.selectbox("Navigate", [
-    "Show Books", "Add New Book", "Add New Borrower", "Lend Book", "Return Book", "STATS"
+    "Show Books", "Add New Book", "Add New Borrower", "Lend Book", "Return Book", "Update Entries", "STATS"
 ])
 
 # Show books
@@ -129,7 +129,65 @@ if menu == "Return Book":
             else:
                 st.error(f"Return failed: {msg}")
 
-# Get statistics
+# Update entries in the database
+if menu == "Update Entries":
+    st.title("📘 Update Entries")
+
+    tab1, tab2 = st.tabs(["📘 Update Book", "🧑‍💼 Update Borrower"])
+
+    with tab1:
+        st.header("📘 Update Book")
+
+        # Fetch books
+        books = list_all_entries_from('Book')
+        book_dict = {f"{book[1]} (ID {book[0]})": book[0] for book in books}
+
+        selected_book = st.selectbox("Select a book to update", list(book_dict.keys()))
+        selected_book_id = book_dict[selected_book]
+
+        book_data = get_book_details(selected_book_id)
+
+        if selected_book:
+            book_id = selected_book_id
+            new_title = st.text_input("Title", value=book_data.title)
+            new_language = st.text_input("Language", value=book_data.language)
+            new_author = st.text_input("Author", value=book_data.author)
+            new_genre = st.text_input("Genre", value=book_data.genre)
+
+            if st.button("✅ Update Book"):
+
+                success, msg = update_book(book_id, new_title, new_language, new_author, new_genre)
+                if success:
+                    st.success(msg)
+                else:
+                    st.error(f"Failed to update book: {msg}")
+
+    with tab2:
+        st.header("🧑‍💼 Update Borrower")
+
+        # Fetch borrowers
+        borrowers = list_all_entries_from('Borrower')
+        borrower_dict = {f"{borrower[1]} {borrower[2]} (ID {borrower[0]})": borrower[0] for borrower in borrowers}
+
+        selected_borrower = st.selectbox("Select a borrower to update", list(borrower_dict.keys()))
+        selected_borrower_id = borrower_dict[selected_borrower]
+
+        borrower_data = get_borrower_details(selected_borrower_id)
+
+        if selected_borrower:
+            borrower_id = borrower_dict[selected_borrower]
+            new_fname = st.text_input("First Name", value=borrower_data.fname)
+            new_lname = st.text_input("Last Name",value=borrower_data.lname)
+            new_phone = st.text_input("Phone Number", value=borrower_data.phone_number)
+            new_email = st.text_input("Email Address",value=borrower_data.email_address)
+
+            if st.button("✅ Update Borrower"):
+
+                success, msg = update_borrower(borrower_id, new_fname, new_lname, new_phone, new_email)
+                if success:
+                    st.success(msg)
+                else:
+                    st.error(f"Failed to update borrower: {msg}")
 
 # Stats
 if menu == "STATS":

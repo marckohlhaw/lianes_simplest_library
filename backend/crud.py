@@ -76,10 +76,50 @@ def return_book(book_id, return_date):
         return False, str(e)
 
 # ----------------------------
-# List all books
+# Update a book
 # ----------------------------
-def list_all_books():
-    query = text("SELECT * FROM Book")
+def update_book(book_id, title, language, author, genre):
+    try:
+        query = text("CALL UpdateBook(:p_book_id, :p_title, :p_language, :p_author, :p_genre)")
+        params = {
+                    "p_book_id": book_id,
+                    "p_title": title,
+                    "p_language": language,
+                    "p_author": author,
+                    "p_genre": genre
+                }
+        with engine.connect() as connection:
+            with connection.begin():
+                connection.execute(query, params)
+        return True, "Book updated successfully."
+    except Exception as e:
+        return False, str(e)
+
+# ----------------------------
+# Update a borrower
+# ----------------------------
+def update_borrower(borrower_id, fname, lname, phone, email):
+    try:
+        query = text("CALL UpdateBorrower(:p_borrower_id, :p_fname, :p_lname, :p_phone_number, :p_email_address)")
+        params = {
+                    "p_borrower_id": borrower_id,
+                    "p_fname": fname,
+                    "p_lname": lname,
+                    "p_phone_number": phone,
+                    "p_email_address": email
+                }
+        with engine.connect() as connection:
+            with connection.begin():
+                connection.execute(query, params)
+        return True, "Borrower updated successfully."
+    except Exception as e:
+        return False, str(e)
+
+# ----------------------------
+# List all entries from a table
+# ----------------------------
+def list_all_entries_from(table_name):
+    query = text(f"SELECT * FROM {table_name}")
     with engine.connect() as connection:
         result = connection.execute(query)
         return result.fetchall()
@@ -116,6 +156,34 @@ def list_active_loans():
     with engine.connect() as connection:
         result = connection.execute(query)
         return result.fetchall()
+
+# ----------------------------
+# Get book details
+# ----------------------------
+def get_book_details(book_id):
+    query = text("""
+        SELECT b.title, a.full_name AS author, g.name AS genre, b.language
+        FROM Book b
+        JOIN Author a ON b.author_id = a.author_id
+        JOIN Genre g ON b.genre_id = g.genre_id
+        WHERE b.book_id = :book_id
+    """)
+    with engine.connect() as connection:
+        result = connection.execute(query, {"book_id": book_id})
+        return result.fetchone()
+
+# ----------------------------
+# Get borrower details      
+# ----------------------------
+def get_borrower_details(borrower_id):
+    query = text("""
+        SELECT fname, lname, phone_number, email_address
+        FROM Borrower
+        WHERE borrower_id = :borrower_id
+    """)
+    with engine.connect() as connection:
+        result = connection.execute(query, {"borrower_id": borrower_id})
+        return result.fetchone()
     
 # ----------------------------
 # Get library stats
