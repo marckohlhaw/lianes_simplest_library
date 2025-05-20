@@ -8,6 +8,7 @@ import plotly.express as px
 import streamlit as st
 from streamlit_searchbox import st_searchbox
 from backend.crud import *
+import datetime
 from datetime import date
 
 st.set_page_config(page_title="Liana's Literary Lounge", layout="centered")
@@ -227,4 +228,4 @@ if menu == "STATS":
                     labels={"books_on_loan": "Books on Loan"}, title="Top Borrowers",
                     color_continuous_scale='Blues')
         
-    st.plotly_chart(fig1)
+        st.plotly_chart(fig1)
