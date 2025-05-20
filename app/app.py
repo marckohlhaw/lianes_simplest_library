@@ -4,7 +4,6 @@ import os
 # Add the parent directory (project root) to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import plotly.express as px
 import streamlit as st
 from streamlit_searchbox import st_searchbox
 from backend.crud import *
@@ -15,7 +14,7 @@ st.title("📚 Liana's Literary Lounge")
 
 # Sidebar navigation
 menu = st.sidebar.selectbox("Navigate", [
-    "Show Books", "Add New Book", "Add New Borrower", "Lend Book", "Return Book", "STATS"
+    "Show Books", "Add New Book", "Add New Borrower", "Lend Book", "Return Book"
 ])
 
 # Show books
@@ -95,45 +94,3 @@ if menu == "Return Book":
                 st.success(msg)
             else:
                 st.error(f"Return failed: {msg}")
-
-# Get statistics
-
-# Stats
-if menu == "STATS":
-    st.header("📊 Library Statistics")
-
-    # Display general statistics
-    stats = get_library_stats()
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.metric(label="👥 Total Borrowers", value=stats["total_borrowers"])
-        st.metric(label="📚 Total Books", value=stats["total_books"])
-
-    with col2:
-        st.metric(label="🟢 Active Borrowers", value=stats["active_borrowers"])
-        st.metric(label="📕 Books on Loan", value=stats["borrowed_books"])
-
-    # Display pie chart for book status
-    stats = get_book_loan_stats()
-    fig = px.pie(
-        names=list(stats.keys()),
-        values=list(stats.values()),
-        title="Library Book Status",
-        color_discrete_sequence=px.colors.qualitative.Pastel
-    )
-    st.plotly_chart(fig, use_container_width=True)
-
-    # Display top borrowers
-    top_borrowers_df = get_top_borrowers()
-
-    st.subheader("🏆 Top 10 Borrowers by Number of Borrowed Books")
-    if top_borrowers_df.empty:
-        st.info("No active loans found.")
-    else:
-        fig1 = px.bar(top_borrowers_df, x="borrower", y="books_on_loan", color="books_on_loan",
-                    labels={"books_on_loan": "Books on Loan"}, title="Top Borrowers",
-                    color_continuous_scale='Blues')
-        
-    st.plotly_chart(fig1)

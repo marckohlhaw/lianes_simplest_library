@@ -1,8 +1,6 @@
 os
 pandas
-plotly
 pymysql
 sqlalchemy
 python-dotenv
 streamlit
-streamlit_searchbox

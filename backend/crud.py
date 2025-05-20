@@ -116,60 +116,6 @@ def list_active_loans():
     with engine.connect() as connection:
         result = connection.execute(query)
         return result.fetchall()
-    
-# ----------------------------
-# Get library stats
-# ----------------------------
-
-def get_library_stats():
-    with engine.connect() as conn:
-        result = conn.execute(text("""
-            SELECT
-                (SELECT COUNT(*) FROM Borrower) AS total_borrowers,
-                (SELECT COUNT(DISTINCT borrower_id) FROM Loan WHERE return_date IS NULL) AS active_borrowers,
-                (SELECT COUNT(*) FROM Book) AS total_books,
-                (SELECT COUNT(*) FROM Loan WHERE return_date IS NULL) AS borrowed_books
-        """)).fetchone()
-        
-        return {
-            "total_borrowers": result[0],
-            "active_borrowers": result[1],
-            "total_books": result[2],
-            "borrowed_books": result[3],
-        }
-
-def get_book_loan_stats():
-    with engine.connect() as conn:
-        result = conn.execute(text("""
-            SELECT 
-                SUM(CASE 
-                    WHEN EXISTS (
-                        SELECT 1 FROM Loan l WHERE l.book_id = b.book_id AND l.return_date IS NULL
-                    ) THEN 1 ELSE 0 
-                END) AS borrowed,
-                SUM(CASE 
-                    WHEN NOT EXISTS (
-                        SELECT 1 FROM Loan l WHERE l.book_id = b.book_id AND l.return_date IS NULL
-                    ) THEN 1 ELSE 0 
-                END) AS available
-            FROM Book b
-        """)).fetchone()
-    return {"Borrowed": result[0], "Available": result[1]}
-
-def get_top_borrowers():
-    with engine.connect() as conn:
-        result = conn.execute(text("""
-            SELECT 
-                CONCAT(b.fname, ' ', b.lname) AS borrower,
-                COUNT(*) AS books_on_loan
-            FROM Loan l
-            JOIN Borrower b ON l.borrower_id = b.borrower_id
-            WHERE l.return_date IS NULL
-            GROUP BY b.borrower_id
-            ORDER BY books_on_loan DESC
-            LIMIT 10
-        """))
-        return pd.DataFrame(result.fetchall(), columns=result.keys())
 
 # Helper functions for dropdowns and searches
 
