@@ -4,9 +4,9 @@ DELIMITER $$
 
 CREATE PROCEDURE AddNewBook(
     IN p_title VARCHAR(255),
-    IN p_language VARCHAR(50),
     IN p_author_name VARCHAR(100),
-    IN p_genre_name VARCHAR(100)
+    IN p_genre_name VARCHAR(100),
+    IN p_language VARCHAR(50)
 )
 BEGIN
     DECLARE v_author_id INT;
